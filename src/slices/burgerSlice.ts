@@ -4,13 +4,15 @@ import {
   getFeedsApi,
   getIngredientsApi,
   getUserApi,
+  logoutApi,
+  getOrdersApi,
   loginUserApi,
   orderBurgerApi,
   registerUserApi
 } from '@api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TConstructorBurger, TIngredient, TOrder, TUser } from '@utils-types';
-import { setCookie } from '../utils/cookie';
+import { deleteCookie, setCookie } from '../utils/cookie';
 
 type TInitialState = {
   ingredients: TIngredient[];
@@ -23,8 +25,14 @@ type TInitialState = {
   isInit: boolean;
   user: TUser;
   orders: TOrder[];
+  userOrders: TOrder[];
   totalOrders: number;
   ordersToday: number;
+};
+
+const initUser: TUser = {
+  name: '',
+  email: ''
 };
 
 const initContructorBurger = {
@@ -43,11 +51,9 @@ const initialState: TInitialState = {
   errorText: '',
   isAuthChecked: false,
   isInit: false,
-  user: {
-    name: '',
-    email: ''
-  },
+  user: initUser,
   orders: [],
+  userOrders: [],
   totalOrders: 0,
   ordersToday: 0
 };
@@ -70,6 +76,12 @@ const burgerSlice = createSlice({
     },
     init(state) {
       state.isInit = true;
+    },
+    removeOrders(state) {
+      state.orders.length = 0;
+    },
+    removeUserOrders(state) {
+      state.userOrders.length = 0;
     }
   },
   selectors: {
@@ -83,7 +95,8 @@ const burgerSlice = createSlice({
     selectUser: (state) => state.user,
     selectOrders: (state) => state.orders,
     selectTotalOrders: (state) => state.totalOrders,
-    selectTodayOrders: (state) => state.ordersToday
+    selectTodayOrders: (state) => state.ordersToday,
+    selectUserOrders: (state) => state.userOrders
   },
   extraReducers: (builder) => {
     builder
@@ -153,6 +166,30 @@ const burgerSlice = createSlice({
         state.orders = action.payload.orders;
         state.totalOrders = action.payload.total;
         state.ordersToday = action.payload.totalToday;
+      })
+      .addCase(fetchUserOrders.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUserOrders.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchUserOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userOrders = action.payload;
+      })
+      .addCase(fetchLogout.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchLogout.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchLogout.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          localStorage.removeItem('refreshToken');
+          deleteCookie('accessToken');
+          state.user = initUser;
+        }
       });
   }
 });
@@ -181,9 +218,18 @@ export const getUserThunk = createAsyncThunk('user/get', async () =>
   getUserApi()
 );
 
+export const fetchUserOrders = createAsyncThunk('user/orders', async () =>
+  getOrdersApi()
+);
+
 export const fetchFeed = createAsyncThunk('user/feed', async () =>
   getFeedsApi()
 );
+
+export const fetchLogout = createAsyncThunk('user/logout', async () =>
+  logoutApi()
+);
+
 
 
 export const {
@@ -196,9 +242,11 @@ export const {
   selectIsAuthChecked,
   selectUser,
   selectOrders,
+  selectUserOrders,
   selectTodayOrders,
   selectTotalOrders
 } = burgerSlice.selectors;
-export const { addIngredient, init, closeOrderRequest } =
+export const { addIngredient, init, closeOrderRequest, removeOrders, removeUserOrders
+} =
   burgerSlice.actions;
 export default burgerSlice.reducer;
