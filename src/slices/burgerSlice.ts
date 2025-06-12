@@ -1,11 +1,16 @@
 import {
   TLoginData,
+  TRegisterData,
+  getFeedsApi,
   getIngredientsApi,
+  getUserApi,
   loginUserApi,
-  orderBurgerApi
+  orderBurgerApi,
+  registerUserApi
 } from '@api';
-import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {TConstructorBurger, TIngredient, TOrder} from '@utils-types';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { TConstructorBurger, TIngredient, TOrder, TUser } from '@utils-types';
+import { setCookie } from '../utils/cookie';
 
 type TInitialState = {
   ingredients: TIngredient[];
@@ -14,45 +19,71 @@ type TInitialState = {
   constructorBurger: TConstructorBurger;
   orderRequest: boolean;
   errorText: string;
+  isAuthChecked: boolean;
+  isInit: boolean;
+  user: TUser;
+  orders: TOrder[];
+  totalOrders: number;
+  ordersToday: number;
+};
+
+const initContructorBurger = {
+  bun: {
+    price: 0
+  },
+  ingredients: []
 };
 
 const initialState: TInitialState = {
   ingredients: [],
   loading: false,
   orderModalData: null,
-  constructorBurger: {
-    bun: {
-      price: 0
-    },
-    ingredients: []
-  },
+  constructorBurger: initContructorBurger,
   orderRequest: false,
-  errorText: ''
+  errorText: '',
+  isAuthChecked: false,
+  isInit: false,
+  user: {
+    name: '',
+    email: ''
+  },
+  orders: [],
+  totalOrders: 0,
+  ordersToday: 0
 };
 
 const burgerSlice = createSlice({
-  name: 'stellarBurger',
+  name: 'burger',
   initialState,
+  reducers: {
+    addIngredient(state, action: PayloadAction<TIngredient>) {
+      if (action.payload.type === 'bun') {
+        state.constructorBurger.bun = action.payload;
+      } else {
+        state.constructorBurger.ingredients.push(action.payload);
+      }
+    },
+    closeOrderRequest(state) {
+      state.orderRequest = false;
+      state.orderModalData = null;
+      state.constructorBurger = initContructorBurger;
+    },
+    init(state) {
+      state.isInit = true;
+    }
+  },
   selectors: {
     selectIngredients: (state) => state.ingredients,
     selectLoading: (state) => state.loading,
     selectOrderModalData: (state) => state.orderModalData,
     selectConstructorBurger: (state) => state.constructorBurger,
     selectOrderRequest: (state) => state.orderRequest,
-    selectErrorText: (state) => state.errorText
-  },
-  reducers: {
-    addIngredient(state, action: PayloadAction<TIngredient>) {
-      if (action.payload.type !== 'bun') {
-        state.constructorBurger.ingredients.push(action.payload);
-      } else {
-        state.constructorBurger.bun = action.payload;
-      }
-    },
-    makeOrderRequest(state, action: PayloadAction<TOrder>) {
-      state.orderModalData = action.payload;
-      state.orderRequest = true;
-    }
+    selectErrorText: (state) => state.errorText,
+    selectIsAuthChecked: (state) => state.isAuthChecked,
+    selectUser: (state) => state.user,
+    selectOrders: (state) => state.orders,
+    selectTotalOrders: (state) => state.totalOrders,
+    selectTodayOrders: (state) => state.ordersToday
   },
   extraReducers: (builder) => {
     builder
@@ -64,25 +95,72 @@ const burgerSlice = createSlice({
         state.ingredients = action.payload;
       })
       .addCase(fetchNewOrder.pending, (state) => {
-        state.loading = true;
+        state.orderRequest = true;
+      })
+      .addCase(fetchNewOrder.rejected, (state, action) => {
+        state.orderRequest = false;
       })
       .addCase(fetchNewOrder.fulfilled, (state, action) => {
-        state.loading = false;
         state.orderModalData = action.payload.order;
+        state.orderRequest = false;
       })
       .addCase(fetchLoginUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchLoginUser.rejected, (state, action) => {
         state.loading = false;
-        console.log(action);
       })
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
+        state.isAuthChecked = true;
         state.loading = false;
-        console.log(action.payload);
+        setCookie('accessToken', action.payload.accessToken);
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+      })
+      .addCase(fetchRegisterUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchRegisterUser.rejected, (state, action) => {
+        state.loading = false;
+        if (action.error.message) {
+          state.errorText = action.error.message;
+        }
+      })
+      .addCase(fetchRegisterUser.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(getUserThunk.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getUserThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.isInit = true;
+      })
+      .addCase(getUserThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isInit = true;
+        state.user.name = action.payload.user.name;
+        state.user.email = action.payload.user.email;
+        state.isAuthChecked = true;
+      })
+      .addCase(fetchFeed.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchFeed.rejected, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(fetchFeed.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload.orders;
+        state.totalOrders = action.payload.total;
+        state.ordersToday = action.payload.totalToday;
       });
   }
 });
+
+export const fetchIngredients = createAsyncThunk(
+  'ingredients/getAll',
+  async () => getIngredientsApi()
+);
 
 export const fetchNewOrder = createAsyncThunk(
   'orders/newOrder',
@@ -94,9 +172,17 @@ export const fetchLoginUser = createAsyncThunk(
   async (data: TLoginData) => loginUserApi(data)
 );
 
-export const fetchIngredients = createAsyncThunk(
-  'ingredients/getAll',
-  async () => getIngredientsApi()
+export const fetchRegisterUser = createAsyncThunk(
+  'user/register',
+  async (data: TRegisterData) => registerUserApi(data)
+);
+
+export const getUserThunk = createAsyncThunk('user/get', async () =>
+  getUserApi()
+);
+
+export const fetchFeed = createAsyncThunk('user/feed', async () =>
+  getFeedsApi()
 );
 
 
@@ -106,7 +192,13 @@ export const {
   selectOrderModalData,
   selectConstructorBurger,
   selectOrderRequest,
-  selectErrorText
+  selectErrorText,
+  selectIsAuthChecked,
+  selectUser,
+  selectOrders,
+  selectTodayOrders,
+  selectTotalOrders
 } = burgerSlice.selectors;
-export const {addIngredient, makeOrderRequest} = burgerSlice.actions;
+export const { addIngredient, init, closeOrderRequest } =
+  burgerSlice.actions;
 export default burgerSlice.reducer;
