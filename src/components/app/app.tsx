@@ -65,7 +65,7 @@ export const App = () => {
         <Route
           path='/forgot-password'
           element={
-            <ProtectedRoute>
+            <ProtectedRoute unAuthOnly>
               <ForgotPassword />
             </ProtectedRoute>
           }
@@ -73,7 +73,7 @@ export const App = () => {
         <Route
           path='/reset-password'
           element={
-            <ProtectedRoute>
+            <ProtectedRoute unAuthOnly>
               <ResetPassword />
             </ProtectedRoute>
           }

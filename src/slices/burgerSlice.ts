@@ -4,6 +4,7 @@ import {
   getFeedsApi,
   getIngredientsApi,
   getUserApi,
+  updateUserApi,
   logoutApi,
   getOrdersApi,
   loginUserApi,
@@ -190,6 +191,19 @@ const burgerSlice = createSlice({
           state.user = initUser;
           state.isAuthenticated = false;
         }
+      })
+      .addCase(fetchUpdateUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUpdateUser.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchUpdateUser.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user.name = action.payload.user.name;
+          state.user.email = action.payload.user.email;
+        }
       });
   }
 });
@@ -213,6 +227,12 @@ export const fetchRegisterUser = createAsyncThunk(
   'user/register',
   async (data: TRegisterData) => registerUserApi(data)
 );
+
+export const fetchUpdateUser = createAsyncThunk(
+  'user/update',
+  async (user: Partial<TRegisterData>) => updateUserApi(user)
+);
+
 
 export const getUserThunk = createAsyncThunk('user/get', async () =>
   getUserApi()
