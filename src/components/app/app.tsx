@@ -50,13 +50,19 @@ export const App = () => {
     } else {
       dispatch(init());
     }
+  }, []);
+
+  useEffect(() => {
     if (!ingredients.length) {
       dispatch(fetchIngredients());
     }
+  }, []);
+
+  useEffect(() => {
     if (!feed.length) {
       dispatch(fetchFeed());
     }
-  });
+  }, []);
 
   return (
     <div className={styles.app}>
