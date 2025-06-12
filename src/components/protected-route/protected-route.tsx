@@ -1,7 +1,8 @@
-import { selectIsAuthChecked } from '../../slices/burgerSlice';
+import { selectIsAuthenticated, selectIsInit } from '../../slices/burgerSlice';
 import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import React from 'react';
+import {Preloader} from "@ui";
 
 type ProtectedRouteProps = {
   children: React.ReactElement;
@@ -12,13 +13,21 @@ export const ProtectedRoute = ({
   children,
   unAuthOnly = false
 }: ProtectedRouteProps) => {
-  const isAuthChecked = useSelector(selectIsAuthChecked);
-  if (isAuthChecked && unAuthOnly) {
-    return <Navigate to='/' />;
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isInit = useSelector(selectIsInit);
+  const location = useLocation();
+
+  if (!isInit) {
+    return <Preloader />;
   }
 
-  if (!isAuthChecked) {
-    return <Navigate to='/login' />;
+  if (!unAuthOnly && !isAuthenticated) {
+    return <Navigate replace to='/login' state={{ from: location }} />;
+  }
+
+  if (unAuthOnly && isAuthenticated) {
+    const from = location.state?.from || { pathname: '/' };
+    return <Navigate replace to={from} />;
   }
 
   return children;

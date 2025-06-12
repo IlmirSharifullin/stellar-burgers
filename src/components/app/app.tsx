@@ -33,129 +33,86 @@ export const App = () => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     const token = getCookie('accessToken');
-    dispatch(fetchFeed());
     if (token) {
-      dispatch(getUserThunk());
-      dispatch(fetchIngredients());
+      dispatch(getUserThunk()).then(() => dispatch(init()));
     } else {
       dispatch(init());
     }
-  }, []);
+  });
 
   return (
-    <Routes>
-      <Route
-        path='*'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <NotFound404 />
-          </div>
-        }
-      />
-      <Route
-        path='/'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <ConstructorPage />
-          </div>
-        }
-      />
-      <Route
-        path='/login'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <Login />
-          </div>
-        }
-      />
-      <Route
-        path='/register'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <Register />
-          </div>
-        }
-      />
-      <Route
-        path='/forgot-password'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <ForgotPassword />
-          </div>
-        }
-      />
-      <Route
-        path='/reset-password'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <ResetPassword />
-          </div>
-        }
-      />
-      <Route
-        path='/profile'
-        element={
-          <ProtectedRoute>
-            <div className={styles.app}>
-              <AppHeader />
+    <div className={styles.app}>
+      <AppHeader />
+      <Routes>
+        <Route path='*' element={<NotFound404 />} />
+        <Route path='/' element={<ConstructorPage />} />
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute unAuthOnly>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute unAuthOnly>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
               <Profile />
-            </div>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path='/feed'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <Feed />
-          </div>
-        }
-      />
-      <Route
-        path='/feed/:number'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <OrderInfo />
-          </div>
-        }
-      />
-      <Route
-        path='/ingredients/:id'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <IngredientDetails />
-          </div>
-        }
-      />
-      <Route
-        path='/profile/orders'
-        element={
-          <div className={styles.app}>
-            <AppHeader />
-            <ProfileOrders />
-          </div>
-        }
-      />
-      <Route
-        path='/profile/orders/:number'
-        element={
-          <ProtectedRoute>
-            <div className={styles.app}>
-              <AppHeader />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
               <OrderInfo />
-            </div>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+            </ProtectedRoute>
+          }
+        />
+        <Route path='/feed' element={<Feed />} />
+        <Route
+          path='/feed/:number'
+          element={<OrderInfo />}
+        />
+        <Route
+          path='/ingredients/:id'
+          element={<IngredientDetails />}
+        />
+
+      </Routes>
+    </div>
   );
 };

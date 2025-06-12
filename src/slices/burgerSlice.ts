@@ -21,7 +21,7 @@ type TInitialState = {
   constructorBurger: TConstructorBurger;
   orderRequest: boolean;
   errorText: string;
-  isAuthChecked: boolean;
+  isAuthenticated: boolean;
   isInit: boolean;
   user: TUser;
   orders: TOrder[];
@@ -49,7 +49,7 @@ const initialState: TInitialState = {
   constructorBurger: initContructorBurger,
   orderRequest: false,
   errorText: '',
-  isAuthChecked: false,
+  isAuthenticated: false,
   isInit: false,
   user: initUser,
   orders: [],
@@ -91,7 +91,8 @@ const burgerSlice = createSlice({
     selectConstructorBurger: (state) => state.constructorBurger,
     selectOrderRequest: (state) => state.orderRequest,
     selectErrorText: (state) => state.errorText,
-    selectIsAuthChecked: (state) => state.isAuthChecked,
+    selectIsAuthenticated: (state) => state.isAuthenticated,
+    selectIsInit: (state) => state.isInit,
     selectUser: (state) => state.user,
     selectOrders: (state) => state.orders,
     selectTotalOrders: (state) => state.totalOrders,
@@ -124,7 +125,7 @@ const burgerSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
-        state.isAuthChecked = true;
+        state.isAuthenticated = true;
         state.loading = false;
         setCookie('accessToken', action.payload.accessToken);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
@@ -146,14 +147,12 @@ const burgerSlice = createSlice({
       })
       .addCase(getUserThunk.rejected, (state, action) => {
         state.loading = false;
-        state.isInit = true;
       })
       .addCase(getUserThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.isInit = true;
         state.user.name = action.payload.user.name;
         state.user.email = action.payload.user.email;
-        state.isAuthChecked = true;
+        state.isAuthenticated = true;
       })
       .addCase(fetchFeed.pending, (state) => {
         state.loading = true;
@@ -189,6 +188,7 @@ const burgerSlice = createSlice({
           localStorage.removeItem('refreshToken');
           deleteCookie('accessToken');
           state.user = initUser;
+          state.isAuthenticated = false;
         }
       });
   }
@@ -239,7 +239,8 @@ export const {
   selectConstructorBurger,
   selectOrderRequest,
   selectErrorText,
-  selectIsAuthChecked,
+  selectIsAuthenticated,
+  selectIsInit,
   selectUser,
   selectOrders,
   selectUserOrders,

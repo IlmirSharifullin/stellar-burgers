@@ -1,4 +1,5 @@
 import { FC, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import {
@@ -6,7 +7,8 @@ import {
   selectConstructorBurger,
   selectOrderModalData,
   fetchNewOrder,
-  closeOrderRequest
+  closeOrderRequest,
+  selectIsAuthenticated
 } from '../../slices/burgerSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../services/store';
@@ -16,8 +18,13 @@ export const BurgerConstructor: FC = () => {
   const orderRequest = useSelector(selectOrderRequest);
   const constructorItems = useSelector(selectConstructorBurger);
   const orderModalData = useSelector(selectOrderModalData);
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const onOrderClick = () => {
+    if (!isAuthenticated) {
+      return navigate('/login');
+    }
     if (constructorItems.bun._id && constructorItems.ingredients.length) {
       const ingredientsIds = constructorItems.ingredients.map(
         (item) => item._id
