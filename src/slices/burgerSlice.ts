@@ -24,6 +24,7 @@ type TInitialState = {
   errorText: string;
   isAuthenticated: boolean;
   isInit: boolean;
+  isModalOpen: boolean;
   user: TUser;
   orders: TOrder[];
   userOrders: TOrder[];
@@ -52,6 +53,7 @@ const initialState: TInitialState = {
   errorText: '',
   isAuthenticated: false,
   isInit: false,
+  isModalOpen: false,
   user: initUser,
   orders: [],
   userOrders: [],
@@ -83,7 +85,13 @@ const burgerSlice = createSlice({
     },
     removeUserOrders(state) {
       state.userOrders.length = 0;
-    }
+    },
+    openModal(state) {
+      state.isModalOpen = true;
+    },
+    closeModal(state) {
+      state.isModalOpen = false;
+    },
   },
   selectors: {
     selectIngredients: (state) => state.ingredients,
@@ -94,6 +102,7 @@ const burgerSlice = createSlice({
     selectErrorText: (state) => state.errorText,
     selectIsAuthenticated: (state) => state.isAuthenticated,
     selectIsInit: (state) => state.isInit,
+    selectIsModalOpen: (state) => state.isModalOpen,
     selectUser: (state) => state.user,
     selectOrders: (state) => state.orders,
     selectTotalOrders: (state) => state.totalOrders,
@@ -261,13 +270,21 @@ export const {
   selectErrorText,
   selectIsAuthenticated,
   selectIsInit,
+  selectIsModalOpen,
   selectUser,
   selectOrders,
   selectUserOrders,
   selectTodayOrders,
   selectTotalOrders
 } = burgerSlice.selectors;
-export const { addIngredient, init, closeOrderRequest, removeOrders, removeUserOrders
+export const {
+  addIngredient,
+  init,
+  closeOrderRequest,
+  removeOrders,
+  removeUserOrders,
+  openModal,
+  closeModal
 } =
   burgerSlice.actions;
 export default burgerSlice.reducer;
