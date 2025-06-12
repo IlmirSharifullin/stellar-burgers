@@ -1,3 +1,8 @@
+export type TConstructorBurger = {
+  bun: TIngredient | { price: number };
+  ingredients: TIngredient[];
+};
+
 export type TIngredient = {
   _id: string;
   name: string;
