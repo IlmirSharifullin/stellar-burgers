@@ -12,8 +12,9 @@ import {
   registerUserApi
 } from '@api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TConstructorBurger, TIngredient, TOrder, TUser } from '@utils-types';
+import { TConstructorBurger, TIngredient, TOrder, TUser, TIngredientUnique } from '@utils-types';
 import { deleteCookie, setCookie } from '../utils/cookie';
+import { v4 as uuidv4 } from 'uuid';
 
 type TInitialState = {
   ingredients: TIngredient[];
@@ -27,7 +28,7 @@ type TInitialState = {
   isModalOpen: boolean;
   user: TUser;
   orders: TOrder[];
-  userOrders: TOrder[];
+  userOrders: TOrder[] | null;
   totalOrders: number;
   ordersToday: number;
 };
@@ -56,7 +57,7 @@ const initialState: TInitialState = {
   isModalOpen: false,
   user: initUser,
   orders: [],
-  userOrders: [],
+  userOrders: null,
   totalOrders: 0,
   ordersToday: 0
 };
@@ -69,10 +70,10 @@ const burgerSlice = createSlice({
       if (action.payload.type === 'bun') {
         state.constructorBurger.bun = action.payload;
       } else {
-        state.constructorBurger.ingredients.push(action.payload);
+        state.constructorBurger.ingredients.push({...action.payload, uniqueId: uuidv4()});
       }
     },
-    deleteIngredient(state, action: PayloadAction<TIngredient>) {
+    deleteIngredient(state, action: PayloadAction<TIngredientUnique>) {
       const ingredientIndex = state.constructorBurger.ingredients.findIndex(
         (item) => item._id === action.payload._id
       );
@@ -89,11 +90,41 @@ const burgerSlice = createSlice({
     init(state) {
       state.isInit = true;
     },
+    setErrorText(state, action: PayloadAction<string>) {
+      state.errorText = action.payload;
+    },
+    removeErrorText(state) {
+      state.errorText = '';
+    },
+    moveIngredientUp(state, action: PayloadAction<TIngredientUnique>) {
+      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
+        (item) => item.uniqueId === action.payload.uniqueId
+      );
+      const prevItem = state.constructorBurger.ingredients[ingredientIndex - 1];
+      state.constructorBurger.ingredients.splice(
+        ingredientIndex - 1,
+        2,
+        action.payload,
+        prevItem
+      );
+    },
+    moveIngredientDown(state, action: PayloadAction<TIngredientUnique>) {
+      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
+        (item) => item.uniqueId === action.payload.uniqueId
+      );
+      const nextItem = state.constructorBurger.ingredients[ingredientIndex + 1];
+      state.constructorBurger.ingredients.splice(
+        ingredientIndex,
+        2,
+        nextItem,
+        action.payload
+      );
+    },
     removeOrders(state) {
       state.orders.length = 0;
     },
     removeUserOrders(state) {
-      state.userOrders.length = 0;
+      state.userOrders = null;
     },
     openModal(state) {
       state.isModalOpen = true;
@@ -140,26 +171,29 @@ const burgerSlice = createSlice({
       .addCase(fetchLoginUser.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchLoginUser.rejected, (state) => {
+      .addCase(fetchLoginUser.rejected, (state, action) => {
         state.loading = false;
+        state.errorText = action.error.message!;
       })
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.loading = false;
         setCookie('accessToken', action.payload.accessToken);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
+        state.isAuthenticated = true;
       })
       .addCase(fetchRegisterUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchRegisterUser.rejected, (state, action) => {
         state.loading = false;
-        if (action.error.message) {
-          state.errorText = action.error.message;
-        }
+        state.errorText = action.error.message!;
       })
-      .addCase(fetchRegisterUser.fulfilled, (state) => {
+      .addCase(fetchRegisterUser.fulfilled, (state, action) => {
         state.loading = false;
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+        setCookie('accessToken', action.payload.accessToken);
+        state.isAuthenticated = true;
       })
       .addCase(getUserThunk.pending, (state) => {
         state.loading = true;
@@ -298,7 +332,11 @@ export const {
   removeOrders,
   removeUserOrders,
   openModal,
-  closeModal
+  closeModal,
+  setErrorText,
+  removeErrorText,
+  moveIngredientUp,
+  moveIngredientDown
 } =
   burgerSlice.actions;
 export default burgerSlice.reducer;

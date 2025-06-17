@@ -1,29 +1,40 @@
-import {FC, SyntheticEvent, useState} from 'react';
-import {LoginUI} from '@ui-pages';
-import {useAppDispatch, useAppSelector} from '../../services/store';
-import {selectErrorText, fetchLoginUser, getUserThunk} from '../../slices/burgerSlice';
+import { FC, SyntheticEvent, useEffect } from 'react';
+import { LoginUI } from '@ui-pages';
+import { fetchLoginUser, selectLoading, selectErrorText, removeErrorText } from '../../slices/burgerSlice';
+import { useAppDispatch, useAppSelector } from '../../services/store';
+import { useForm } from '../../hooks/useForm';
+
+import { Preloader } from '@ui';
 
 export const Login: FC = () => {
-  const dispatch= useAppDispatch();
-  const errorText = useAppSelector(selectErrorText);
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const dispatch = useAppDispatch();
+  const { values, handleChange } = useForm({
+    email: '',
+    password: ''
+  });
+  const error = useAppSelector(selectErrorText);
+  const isLoading = useAppSelector(selectLoading);
+  useEffect(() => {
+    dispatch(removeErrorText());
+  }, []);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(fetchLoginUser({ email, password })).then(() =>
-      dispatch(getUserThunk())
-    );
+    dispatch(removeErrorText());
+    dispatch(fetchLoginUser(values));
   };
+
+  if (isLoading) {
+    return <Preloader />;
+  }
 
   return (
     <LoginUI
-      errorText={errorText}
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
+      errorText={error}
+      email={values.email}
+      setEmail={handleChange}
+      password={values.password}
+      setPassword={handleChange}
       handleSubmit={handleSubmit}
     />
   );
