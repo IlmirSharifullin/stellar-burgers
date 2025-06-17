@@ -1,12 +1,19 @@
 import { ProfileUI } from '@ui-pages';
+import { Preloader } from '@ui';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  selectUser,
+  selectLoading,
+  fetchUpdateUser
+} from '../../slices/burgerSlice';
+import { AppDispatch } from '../../services/store';
 
 export const Profile: FC = () => {
-  /** TODO: взять переменную из стора */
-  const user = {
-    name: '',
-    email: ''
-  };
+  const user = useSelector(selectUser);
+
+  const isLoading = useSelector(selectLoading);
+  const dispatch: AppDispatch = useDispatch();
 
   const [formValue, setFormValue] = useState({
     name: user.name,
@@ -29,6 +36,7 @@ export const Profile: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+    dispatch(fetchUpdateUser(formValue));
   };
 
   const handleCancel = (e: SyntheticEvent) => {
@@ -46,16 +54,17 @@ export const Profile: FC = () => {
       [e.target.name]: e.target.value
     }));
   };
+  if (!isLoading) {
+    return (
+      <ProfileUI
+        formValue={formValue}
+        isFormChanged={isFormChanged}
+        handleCancel={handleCancel}
+        handleSubmit={handleSubmit}
+        handleInputChange={handleInputChange}
+      />
+    );
+  }
 
-  return (
-    <ProfileUI
-      formValue={formValue}
-      isFormChanged={isFormChanged}
-      handleCancel={handleCancel}
-      handleSubmit={handleSubmit}
-      handleInputChange={handleInputChange}
-    />
-  );
-
-  return null;
+  return <Preloader />;
 };
