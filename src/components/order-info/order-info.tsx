@@ -3,11 +3,11 @@ import { Preloader } from '@ui';
 import { OrderInfoUI } from '@ui';
 import { TIngredient } from '@utils-types';
 import { useParams, redirect } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import {
   selectOrders,
   selectIngredients
 } from '../../slices/burgerSlice';
+import {useAppSelector} from "../../services/store";
 export const OrderInfo: FC = () => {
   const params = useParams<{ number: string }>();
   if (!params.number) {
@@ -15,12 +15,12 @@ export const OrderInfo: FC = () => {
     return null;
   }
 
-  const orders = useSelector(selectOrders);
+  const orders = useAppSelector(selectOrders);
   const orderData = orders.find(
     (item) => item.number === parseInt(params.number!)
   );
 
-  const ingredients: TIngredient[] = useSelector(selectIngredients);
+  const ingredients: TIngredient[] = useAppSelector(selectIngredients);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {

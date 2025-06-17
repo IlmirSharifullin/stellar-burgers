@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect, FC } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { useSelector } from 'react-redux';
 import { selectIngredients } from '../../slices/burgerSlice';
 
 import { TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '@ui';
+import {useAppSelector} from "../../services/store";
 
 export const BurgerIngredients: FC = () => {
-  const ingredients = useSelector(selectIngredients);
+  const ingredients = useAppSelector(selectIngredients);
 
   const buns = ingredients.filter((item) => item.type === 'bun');
   const mains = ingredients.filter((item) => item.type === 'main');

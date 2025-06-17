@@ -7,15 +7,14 @@ import {
 
 import styles from './order-card.module.css';
 
-import { AppDispatch } from 'src/services/store';
-import { useDispatch } from 'react-redux';
+import {useAppDispatch} from 'src/services/store';
 import { openModal } from '../../../slices/burgerSlice';
 import { OrderCardUIProps } from './type';
 import { OrderStatus } from '@components';
 
 export const OrderCardUI: FC<OrderCardUIProps> = memo(
   ({ orderInfo, maxIngredients, locationState }) => {
-    const dispatch: AppDispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const onClick = () => {
       dispatch(openModal());

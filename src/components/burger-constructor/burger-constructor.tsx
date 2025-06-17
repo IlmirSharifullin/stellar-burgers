@@ -10,16 +10,15 @@ import {
   closeOrderRequest,
   selectIsAuthenticated
 } from '../../slices/burgerSlice';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../../services/store';
+import { useAppDispatch, useAppSelector } from '../../services/store';
 
 export const BurgerConstructor: FC = () => {
-  const dispatch: AppDispatch = useDispatch();
-  const orderRequest = useSelector(selectOrderRequest);
-  const constructorItems = useSelector(selectConstructorBurger);
-  const orderModalData = useSelector(selectOrderModalData);
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const orderRequest = useAppSelector(selectOrderRequest);
+  const constructorItems = useAppSelector(selectConstructorBurger);
+  const orderModalData = useAppSelector(selectOrderModalData);
   const navigate = useNavigate();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const onOrderClick = () => {
     if (!isAuthenticated) {

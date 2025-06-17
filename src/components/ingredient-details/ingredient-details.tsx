@@ -1,10 +1,9 @@
 import { FC, useEffect } from 'react';
-import { Preloader } from '../ui/preloader';
-import { IngredientDetailsUI } from '../ui/ingredient-details';
+import { Preloader,IngredientDetailsUI } from '@ui';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { selectIngredients } from '../../slices/burgerSlice';
 import { useNavigate } from 'react-router-dom';
+import {useAppSelector} from "../../services/store";
 
 export const IngredientDetails: FC = () => {
   const navigate = useNavigate();
@@ -16,7 +15,7 @@ export const IngredientDetails: FC = () => {
     }
   }, []);
 
-  const ingredients = useSelector(selectIngredients);
+  const ingredients = useAppSelector(selectIngredients);
   const ingredientData = ingredients.find((item) => item._id === params.id);
 
   if (!ingredientData) {

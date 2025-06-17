@@ -8,15 +8,14 @@ import {
   AddButton
 } from '@zlden/react-developer-burger-ui-components';
 
-import { AppDispatch } from 'src/services/store';
-import { useDispatch } from 'react-redux';
+import {useAppDispatch} from 'src/services/store';
 import { openModal } from '../../../slices/burgerSlice';
 import { TBurgerIngredientUIProps } from './type';
 
 export const BurgerIngredientUI: FC<TBurgerIngredientUIProps> = memo(
   ({ ingredient, count, handleAdd, locationState }) => {
     const { image, price, name, _id } = ingredient;
-    const dispatch: AppDispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const onClick = () => {
       dispatch(openModal());

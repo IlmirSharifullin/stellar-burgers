@@ -20,8 +20,7 @@ import {
   Modal
 } from '@components';
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../../services/store';
+import {AppDispatch, useAppDispatch, useAppSelector} from '../../services/store';
 import { getCookie } from '../../utils/cookie';
 import {
   closeModal,
@@ -36,14 +35,14 @@ import {
 } from '../../slices/burgerSlice';
 
 export const App = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useAppDispatch();
   const location = useLocation();
   const backgroundLocation = location.state?.background;
-  const isModalOpened = useSelector(selectIsModalOpen);
+  const isModalOpened = useAppSelector(selectIsModalOpen);
   const token = getCookie('accessToken');
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const ingredients = useSelector(selectIngredients);
-  const feed = useSelector(selectOrders);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const ingredients = useAppSelector(selectIngredients);
+  const feed = useAppSelector(selectOrders);
   useEffect(() => {
     if (!isAuthenticated && token) {
       dispatch(getUserThunk()).then(() => dispatch(init()));
