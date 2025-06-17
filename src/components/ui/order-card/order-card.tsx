@@ -7,7 +7,7 @@ import {
 
 import styles from './order-card.module.css';
 
-import {useAppDispatch} from 'src/services/store';
+import { useAppDispatch } from 'src/services/store';
 import { openModal } from '../../../slices/burgerSlice';
 import { OrderCardUIProps } from './type';
 import { OrderStatus } from '@components';

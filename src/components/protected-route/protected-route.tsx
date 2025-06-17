@@ -1,8 +1,8 @@
 import { selectIsAuthenticated, selectIsInit } from '../../slices/burgerSlice';
 import { Navigate, useLocation } from 'react-router-dom';
 import React from 'react';
-import {Preloader} from "@ui";
-import {useAppSelector} from "../../services/store";
+import { Preloader } from '@ui';
+import { useAppSelector } from '../../services/store';
 
 type ProtectedRouteProps = {
   children: React.ReactElement;
@@ -13,7 +13,7 @@ export const ProtectedRoute = ({
   children,
   unAuthOnly = false
 }: ProtectedRouteProps) => {
-    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isInit = useAppSelector(selectIsInit);
   const location = useLocation();
 

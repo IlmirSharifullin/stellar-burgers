@@ -8,7 +8,7 @@ import {
   AddButton
 } from '@zlden/react-developer-burger-ui-components';
 
-import {useAppDispatch} from 'src/services/store';
+import { useAppDispatch } from 'src/services/store';
 import { openModal } from '../../../slices/burgerSlice';
 import { TBurgerIngredientUIProps } from './type';
 

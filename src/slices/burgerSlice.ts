@@ -3,16 +3,22 @@ import {
   TRegisterData,
   getFeedsApi,
   getIngredientsApi,
-  getUserApi,
-  updateUserApi,
-  logoutApi,
   getOrdersApi,
+  getUserApi,
+  logoutApi,
   loginUserApi,
   orderBurgerApi,
-  registerUserApi
+  registerUserApi,
+  updateUserApi
 } from '@api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TConstructorBurger, TIngredient, TOrder, TUser, TIngredientUnique } from '@utils-types';
+import {
+  TConstructorBurger,
+  TIngredient,
+  TIngredientUnique,
+  TOrder,
+  TUser
+} from '@utils-types';
 import { deleteCookie, setCookie } from '../utils/cookie';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,75 +26,88 @@ type TInitialState = {
   ingredients: TIngredient[];
   loading: boolean;
   orderModalData: TOrder | null;
-  constructorBurger: TConstructorBurger;
+  constructorItems: TConstructorBurger;
   orderRequest: boolean;
-  errorText: string;
-  isAuthenticated: boolean;
-  isInit: boolean;
-  isModalOpen: boolean;
   user: TUser;
   orders: TOrder[];
-  userOrders: TOrder[] | null;
   totalOrders: number;
   ordersToday: number;
-};
-
-const initUser: TUser = {
-  name: '',
-  email: ''
-};
-
-const initContructorBurger = {
-  bun: {
-    price: 0
-  },
-  ingredients: []
+  userOrders: TOrder[] | null;
+  isAuthenticated: boolean;
+  isInit: boolean;
+  isModalOpened: boolean;
+  errorText: string;
 };
 
 const initialState: TInitialState = {
   ingredients: [],
   loading: false,
   orderModalData: null,
-  constructorBurger: initContructorBurger,
+  constructorItems: {
+    bun: {
+      price: 0
+    },
+    ingredients: []
+  },
   orderRequest: false,
-  errorText: '',
+  user: {
+    name: '',
+    email: ''
+  },
+  orders: [],
+  totalOrders: 0,
+  ordersToday: 0,
+  userOrders: null,
   isAuthenticated: false,
   isInit: false,
-  isModalOpen: false,
-  user: initUser,
-  orders: [],
-  userOrders: null,
-  totalOrders: 0,
-  ordersToday: 0
+  isModalOpened: false,
+  errorText: ''
 };
 
-const burgerSlice = createSlice({
-  name: 'burger',
+const stellarBurgerSlice = createSlice({
+  name: 'stellarBurger',
   initialState,
   reducers: {
     addIngredient(state, action: PayloadAction<TIngredient>) {
       if (action.payload.type === 'bun') {
-        state.constructorBurger.bun = action.payload;
+        state.constructorItems.bun = action.payload;
       } else {
-        state.constructorBurger.ingredients.push({...action.payload, uniqueId: uuidv4()});
+        state.constructorItems.ingredients.push({
+          ...action.payload,
+          uniqueId: uuidv4()
+        });
       }
-    },
-    deleteIngredient(state, action: PayloadAction<TIngredientUnique>) {
-      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
-        (item) => item._id === action.payload._id
-      );
-      state.constructorBurger.ingredients =
-        state.constructorBurger.ingredients.filter(
-          (_, index) => index !== ingredientIndex
-        );
     },
     closeOrderRequest(state) {
       state.orderRequest = false;
       state.orderModalData = null;
-      state.constructorBurger = initContructorBurger;
+      state.constructorItems = {
+        bun: {
+          price: 0
+        },
+        ingredients: []
+      };
+    },
+    removeOrders(state) {
+      state.orders.length = 0;
     },
     init(state) {
       state.isInit = true;
+    },
+    openModal(state) {
+      state.isModalOpened = true;
+    },
+    closeModal(state) {
+      state.isModalOpened = false;
+    },
+    deleteIngredient(state, action: PayloadAction<TIngredientUnique>) {
+      const ingredientIndex = state.constructorItems.ingredients.findIndex(
+        (item) => item.uniqueId === action.payload.uniqueId
+      );
+      state.constructorItems.ingredients =
+        state.constructorItems.ingredients.filter(
+          (_, index) => index !== ingredientIndex
+        );
     },
     setErrorText(state, action: PayloadAction<string>) {
       state.errorText = action.payload;
@@ -97,11 +116,11 @@ const burgerSlice = createSlice({
       state.errorText = '';
     },
     moveIngredientUp(state, action: PayloadAction<TIngredientUnique>) {
-      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
+      const ingredientIndex = state.constructorItems.ingredients.findIndex(
         (item) => item.uniqueId === action.payload.uniqueId
       );
-      const prevItem = state.constructorBurger.ingredients[ingredientIndex - 1];
-      state.constructorBurger.ingredients.splice(
+      const prevItem = state.constructorItems.ingredients[ingredientIndex - 1];
+      state.constructorItems.ingredients.splice(
         ingredientIndex - 1,
         2,
         action.payload,
@@ -109,45 +128,36 @@ const burgerSlice = createSlice({
       );
     },
     moveIngredientDown(state, action: PayloadAction<TIngredientUnique>) {
-      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
+      const ingredientIndex = state.constructorItems.ingredients.findIndex(
         (item) => item.uniqueId === action.payload.uniqueId
       );
-      const nextItem = state.constructorBurger.ingredients[ingredientIndex + 1];
-      state.constructorBurger.ingredients.splice(
+      const nextItem = state.constructorItems.ingredients[ingredientIndex + 1];
+      state.constructorItems.ingredients.splice(
         ingredientIndex,
         2,
         nextItem,
         action.payload
       );
     },
-    removeOrders(state) {
-      state.orders.length = 0;
-    },
     removeUserOrders(state) {
       state.userOrders = null;
-    },
-    openModal(state) {
-      state.isModalOpen = true;
-    },
-    closeModal(state) {
-      state.isModalOpen = false;
-    },
+    }
   },
   selectors: {
     selectIngredients: (state) => state.ingredients,
     selectLoading: (state) => state.loading,
     selectOrderModalData: (state) => state.orderModalData,
-    selectConstructorBurger: (state) => state.constructorBurger,
+    selectConstructorItems: (state) => state.constructorItems,
     selectOrderRequest: (state) => state.orderRequest,
-    selectErrorText: (state) => state.errorText,
-    selectIsAuthenticated: (state) => state.isAuthenticated,
-    selectIsInit: (state) => state.isInit,
-    selectIsModalOpen: (state) => state.isModalOpen,
     selectUser: (state) => state.user,
     selectOrders: (state) => state.orders,
     selectTotalOrders: (state) => state.totalOrders,
     selectTodayOrders: (state) => state.ordersToday,
-    selectUserOrders: (state) => state.userOrders
+    selectUserOrders: (state) => state.userOrders,
+    selectIsAuthenticated: (state) => state.isAuthenticated,
+    selectIsInit: (state) => state.isInit,
+    selectIsModalOpened: (state) => state.isModalOpened,
+    selectErrorText: (state) => state.errorText
   },
   extraReducers: (builder) => {
     builder
@@ -176,7 +186,6 @@ const burgerSlice = createSlice({
         state.errorText = action.error.message!;
       })
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
-        state.isAuthenticated = true;
         state.loading = false;
         setCookie('accessToken', action.payload.accessToken);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
@@ -198,7 +207,7 @@ const burgerSlice = createSlice({
       .addCase(getUserThunk.pending, (state) => {
         state.loading = true;
         state.isAuthenticated = false;
-        state.user = initUser;
+        state.user = { name: '', email: '' };
         deleteCookie('accessToken');
         localStorage.removeItem('refreshToken');
       })
@@ -244,7 +253,7 @@ const burgerSlice = createSlice({
         if (action.payload.success) {
           localStorage.removeItem('refreshToken');
           deleteCookie('accessToken');
-          state.user = initUser;
+          state.user = { name: '', email: '' };
           state.isAuthenticated = false;
         }
       })
@@ -284,59 +293,55 @@ export const fetchRegisterUser = createAsyncThunk(
   async (data: TRegisterData) => registerUserApi(data)
 );
 
-export const fetchUpdateUser = createAsyncThunk(
-  'user/update',
-  async (user: Partial<TRegisterData>) => updateUserApi(user)
-);
-
-
 export const getUserThunk = createAsyncThunk('user/get', async () =>
   getUserApi()
-);
-
-export const fetchUserOrders = createAsyncThunk('user/orders', async () =>
-  getOrdersApi()
 );
 
 export const fetchFeed = createAsyncThunk('user/feed', async () =>
   getFeedsApi()
 );
 
+export const fetchUserOrders = createAsyncThunk('user/orders', async () =>
+  getOrdersApi()
+);
+
 export const fetchLogout = createAsyncThunk('user/logout', async () =>
   logoutApi()
 );
 
-
+export const fetchUpdateUser = createAsyncThunk(
+  'user/update',
+  async (user: Partial<TRegisterData>) => updateUserApi(user)
+);
 
 export const {
   selectLoading,
   selectIngredients,
   selectOrderModalData,
-  selectConstructorBurger,
+  selectConstructorItems,
   selectOrderRequest,
-  selectErrorText,
-  selectIsAuthenticated,
-  selectIsInit,
-  selectIsModalOpen,
   selectUser,
   selectOrders,
-  selectUserOrders,
+  selectTotalOrders,
   selectTodayOrders,
-  selectTotalOrders
-} = burgerSlice.selectors;
+  selectUserOrders,
+  selectIsAuthenticated,
+  selectIsInit,
+  selectIsModalOpened,
+  selectErrorText
+} = stellarBurgerSlice.selectors;
 export const {
   addIngredient,
-  deleteIngredient,
-  init,
   closeOrderRequest,
   removeOrders,
   removeUserOrders,
+  init,
   openModal,
   closeModal,
+  deleteIngredient,
   setErrorText,
   removeErrorText,
   moveIngredientUp,
   moveIngredientDown
-} =
-  burgerSlice.actions;
-export default burgerSlice.reducer;
+} = stellarBurgerSlice.actions;
+export default stellarBurgerSlice.reducer;

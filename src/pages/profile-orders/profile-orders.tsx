@@ -1,5 +1,4 @@
 import { ProfileOrdersUI } from '@ui-pages';
-import { TOrder } from '@utils-types';
 import { Preloader } from '@ui';
 import { FC, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../services/store';
@@ -10,7 +9,6 @@ import {
   selectUserOrders
 } from '../../slices/burgerSlice';
 
-
 export const ProfileOrders: FC = () => {
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -20,7 +18,7 @@ export const ProfileOrders: FC = () => {
   const orders = useAppSelector(selectUserOrders);
 
   if (orders) {
-    return <ProfileOrdersUI orders={orders}/>;
+    return <ProfileOrdersUI orders={orders} />;
   }
 
   return <Preloader />;

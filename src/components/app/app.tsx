@@ -20,7 +20,11 @@ import {
   Modal
 } from '@components';
 import { useEffect } from 'react';
-import {AppDispatch, useAppDispatch, useAppSelector} from '../../services/store';
+import {
+  AppDispatch,
+  useAppDispatch,
+  useAppSelector
+} from '../../services/store';
 import { getCookie } from '../../utils/cookie';
 import {
   closeModal,

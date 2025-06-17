@@ -28,12 +28,7 @@ export const BurgerConstructor: FC = () => {
       const ingredientsIds = constructorItems.ingredients.map(
         (item) => item._id
       );
-      dispatch(
-        fetchNewOrder([
-          constructorItems.bun._id,
-          ...ingredientsIds,
-        ])
-      );
+      dispatch(fetchNewOrder([constructorItems.bun._id, ...ingredientsIds]));
     }
   };
   const closeOrderModal = () => {

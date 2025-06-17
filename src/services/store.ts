@@ -1,15 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
+import stellarBurgerSlice from '../slices/burgerSlice';
+
 import {
   TypedUseSelectorHook,
   useDispatch as dispatchHook,
   useSelector as selectorHook
 } from 'react-redux';
 
-import burgerSlice from "../slices/burgerSlice";
-
 const store = configureStore({
   reducer: {
-    stellarBurger: burgerSlice
+    stellarBurger: stellarBurgerSlice
   },
   devTools: process.env.NODE_ENV !== 'production'
 });

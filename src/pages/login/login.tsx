@@ -1,6 +1,11 @@
 import { FC, SyntheticEvent, useEffect } from 'react';
 import { LoginUI } from '@ui-pages';
-import { fetchLoginUser, selectLoading, selectErrorText, removeErrorText } from '../../slices/burgerSlice';
+import {
+  fetchLoginUser,
+  selectLoading,
+  selectErrorText,
+  removeErrorText
+} from '../../slices/burgerSlice';
 import { useAppDispatch, useAppSelector } from '../../services/store';
 import { useForm } from '../../hooks/useForm';
 

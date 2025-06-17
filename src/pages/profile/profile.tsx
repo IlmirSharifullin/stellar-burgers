@@ -2,7 +2,11 @@ import { ProfileUI } from '@ui-pages';
 import { Preloader } from '@ui';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectUser, selectLoading, fetchUpdateUser } from '../../slices/burgerSlice';
+import {
+  selectUser,
+  selectLoading,
+  fetchUpdateUser
+} from '../../slices/burgerSlice';
 import { AppDispatch } from '../../services/store';
 
 export const Profile: FC = () => {
@@ -51,13 +55,15 @@ export const Profile: FC = () => {
     }));
   };
   if (!isLoading) {
-    return <ProfileUI
-      formValue={formValue}
-      isFormChanged={isFormChanged}
-      handleCancel={handleCancel}
-      handleSubmit={handleSubmit}
-      handleInputChange={handleInputChange}
-    />
+    return (
+      <ProfileUI
+        formValue={formValue}
+        isFormChanged={isFormChanged}
+        handleCancel={handleCancel}
+        handleSubmit={handleSubmit}
+        handleInputChange={handleInputChange}
+      />
+    );
   }
 
   return <Preloader />;

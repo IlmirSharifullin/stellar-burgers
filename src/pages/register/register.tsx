@@ -6,7 +6,7 @@ import {
   removeErrorText,
   selectErrorText,
   selectLoading
-} from '../../slices/stellarBurgerSlice';
+} from '../../slices/burgerSlice';
 import { useAppSelector, useAppDispatch } from '../../services/store';
 import { useForm } from '../../hooks/useForm';
 import { Preloader } from '@ui';
