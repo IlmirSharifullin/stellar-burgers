@@ -7,7 +7,7 @@ import { useAppDispatch } from '../../services/store';
 import { addIngredient } from '../../slices/burgerSlice';
 
 export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
-  ({ ingredient, count }) => {
+  ({ ingredient, count, index }) => {
     const location = useLocation();
     const dispatch = useAppDispatch();
 
@@ -20,6 +20,7 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
         count={count}
         locationState={{ background: location }}
         handleAdd={handleAdd}
+        index={index}
       />
     );
   }

@@ -54,7 +54,7 @@ export const App = () => {
         .then(() => {
           dispatch(init());
         })
-        .catch((e) => {
+        .catch(() => {
           deleteCookie('accessToken');
           localStorage.removeItem('refreshToken');
         });

@@ -10,7 +10,7 @@ import stellarBurgerSlice, {
   fetchUpdateUser,
   fetchUserOrders,
   getUserThunk,
-  initialState,
+  initialState
 } from '../burgerSlice';
 import { mockStore } from '../mockData';
 

@@ -10,16 +10,15 @@ import {
   orderBurgerApi,
   registerUserApi,
   updateUserApi
-} from '@api';
+} from '../utils/burger-api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   TConstructorBurger,
   TIngredient,
   TIngredientUnique,
   TOrder,
-  TUser
+  TUser,
 } from '@utils-types';
-import { deleteCookie, setCookie } from '../utils/cookie';
 import { v4 as uuidv4 } from 'uuid';
 
 type TInitialState = {
@@ -187,7 +186,6 @@ const stellarBurgerSlice = createSlice({
       })
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
         state.loading = false;
-        setCookie('accessToken', action.payload.accessToken);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
         state.isAuthenticated = true;
       })
@@ -201,14 +199,12 @@ const stellarBurgerSlice = createSlice({
       .addCase(fetchRegisterUser.fulfilled, (state, action) => {
         state.loading = false;
         localStorage.setItem('refreshToken', action.payload.refreshToken);
-        setCookie('accessToken', action.payload.accessToken);
         state.isAuthenticated = true;
       })
       .addCase(getUserThunk.pending, (state) => {
         state.loading = true;
         state.isAuthenticated = false;
         state.user = { name: '', email: '' };
-        deleteCookie('accessToken');
         localStorage.removeItem('refreshToken');
       })
       .addCase(getUserThunk.rejected, (state) => {
