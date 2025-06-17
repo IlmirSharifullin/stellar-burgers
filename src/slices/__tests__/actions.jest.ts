@@ -1,11 +1,13 @@
 import { expect, test, describe, jest } from '@jest/globals';
 import { configureStore } from '@reduxjs/toolkit';
-import burgerSlice, {
+import stellarBurgerSlice, {
   addIngredient,
   closeModal,
   closeOrderRequest,
   deleteIngredient,
   init,
+  moveIngredientDown,
+  moveIngredientUp,
   openModal,
   removeErrorText,
   removeOrders,
@@ -22,28 +24,20 @@ import burgerSlice, {
 } from '../burgerSlice';
 import { mockStore } from '../mockData';
 
-const store = configureStore({
-  reducer: {
-    stellarBurger: burgerSlice,
-  },
-  preloadedState: {
-    stellarBurger: mockStore,
-  },
-});
-
-afterAll(() => {
-  store = configureStore({
+function initStore() {
+  return configureStore({
     reducer: {
-      stellarBurger: burgerSlice,
+      stellarBurger: stellarBurgerSlice
     },
     preloadedState: {
       stellarBurger: mockStore
     }
   });
-});
+}
 
 describe('Test actions', () => {
   test('Test deleteIngredient', () => {
+    const store = initStore();
     const before = selectConstructorBurger(store.getState()).ingredients.length;
     store.dispatch(
       deleteIngredient({
@@ -59,15 +53,16 @@ describe('Test actions', () => {
         image_mobile:
           'https://code.s3.yandex.net/react/code/meat-01-mobile.png',
         image_large: 'https://code.s3.yandex.net/react/code/meat-01-large.png',
-        uniqueId: 'testid'
+        uniqueId: 'test_id_1'
       })
     );
     const after = selectConstructorBurger(store.getState()).ingredients.length;
-    expect(before).toBe(1);
-    expect(after).toBe(0);
+    expect(before).toBe(3);
+    expect(after).toBe(2);
   });
 
-  test('Test addIngredients', () => {
+  test('Test addIngredient', () => {
+    const store = initStore();
     store.dispatch(
       addIngredient({
         _id: '643d69a5c3f7b9001cfa0941',
@@ -84,12 +79,29 @@ describe('Test actions', () => {
         image_large: 'https://code.s3.yandex.net/react/code/meat-01-large.png'
       })
     );
+    store.dispatch(
+      addIngredient({
+        _id: '643d69a5c3f7b9001cfa093c',
+        name: 'Краторная булка N-200i',
+        type: 'bun',
+        proteins: 80,
+        fat: 24,
+        carbohydrates: 53,
+        calories: 420,
+        price: 1255,
+        image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+        image_mobile: 'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+        image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
+      })
+    );
 
-    const ingredients = selectConstructorBurger(store.getState()).ingredients;
-    expect(ingredients.length).toEqual(1);
+    const constructor = selectConstructorBurger(store.getState());
+    expect(constructor.ingredients.length).toEqual(4);
+    expect(constructor.bun.name === 'Краторная булка N-200i');
   });
 
   test('Test closeOrderRequest', () => {
+    const store = initStore();
     store.dispatch(closeOrderRequest());
 
     const orderRequest = selectOrderRequest(store.getState());
@@ -107,6 +119,7 @@ describe('Test actions', () => {
   });
 
   test('Test removeOrders', () => {
+    const store = initStore();
     const initialOrders = selectOrders(store.getState()).length;
     store.dispatch(removeOrders());
     const orders = selectOrders(store.getState()).length;
@@ -115,6 +128,7 @@ describe('Test actions', () => {
   });
 
   test('Test removeUserOrders', () => {
+    const store = initStore();
     const initialOrders = selectUserOrders(store.getState())!.length;
     store.dispatch(removeUserOrders());
     const orders = selectUserOrders(store.getState());
@@ -123,6 +137,7 @@ describe('Test actions', () => {
   });
 
   test('Test init', () => {
+    const store = initStore();
     const beforeInit = selectIsInit(store.getState());
     store.dispatch(init());
     const afterInit = selectIsInit(store.getState());
@@ -131,6 +146,7 @@ describe('Test actions', () => {
   });
 
   test('Test openModal', () => {
+    const store = initStore();
     const beforeOpen = selectIsModalOpened(store.getState());
     store.dispatch(openModal());
     const afterOpen = selectIsModalOpened(store.getState());
@@ -139,21 +155,48 @@ describe('Test actions', () => {
   });
 
   test('Test closeModal', () => {
+    const store = initStore();
     store.dispatch(closeModal());
     const isOpen = selectIsModalOpened(store.getState());
     expect(isOpen).toBe(false);
   });
 
   test('Test setErrorText', () => {
+    const store = initStore();
     store.dispatch(setErrorText('my test error'));
     const errorText = selectErrorText(store.getState());
     expect(errorText).toBe('my test error');
   });
 
   test('Test removeErrorText', () => {
+    const store = initStore();
     store.dispatch(setErrorText('Error here!'));
     store.dispatch(removeErrorText());
     const errorText = selectErrorText(store.getState());
     expect(errorText).toBe('');
+  });
+
+  test('Test moveIngredientUp', () => {
+    const store = initStore();
+    let ingredients = selectConstructorBurger(store.getState()).ingredients;
+    const lastIngredient = ingredients[ingredients.length - 1];
+
+    store.dispatch(moveIngredientUp(lastIngredient));
+
+    ingredients = selectConstructorBurger(store.getState()).ingredients;
+
+    expect(ingredients[ingredients.length - 2]).toEqual(lastIngredient);
+  });
+
+  test('Test moveIngredientDown', () => {
+    const store = initStore();
+    let ingredients = selectConstructorBurger(store.getState()).ingredients;
+    const firstIngredient = ingredients[0];
+
+    store.dispatch(moveIngredientDown(firstIngredient));
+
+    ingredients = selectConstructorBurger(store.getState()).ingredients;
+
+    expect(ingredients[1]).toEqual(firstIngredient);
   });
 });
