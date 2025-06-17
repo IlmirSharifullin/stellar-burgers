@@ -34,7 +34,7 @@ import {
   init,
   selectIngredients,
   selectIsAuthenticated,
-  selectIsModalOpen,
+  selectIsModalOpened,
   selectOrders
 } from '../../slices/burgerSlice';
 
@@ -42,7 +42,7 @@ export const App = () => {
   const dispatch: AppDispatch = useAppDispatch();
   const location = useLocation();
   const backgroundLocation = location.state?.background;
-  const isModalOpened = useAppSelector(selectIsModalOpen);
+  const isModalOpened = useAppSelector(selectIsModalOpened);
   const token = getCookie('accessToken');
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const ingredients = useAppSelector(selectIngredients);

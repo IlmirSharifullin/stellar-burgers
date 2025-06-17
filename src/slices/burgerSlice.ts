@@ -26,7 +26,7 @@ type TInitialState = {
   ingredients: TIngredient[];
   loading: boolean;
   orderModalData: TOrder | null;
-  constructorItems: TConstructorBurger;
+  constructorBurger: TConstructorBurger;
   orderRequest: boolean;
   user: TUser;
   orders: TOrder[];
@@ -43,7 +43,7 @@ const initialState: TInitialState = {
   ingredients: [],
   loading: false,
   orderModalData: null,
-  constructorItems: {
+  constructorBurger: {
     bun: {
       price: 0
     },
@@ -70,9 +70,9 @@ const stellarBurgerSlice = createSlice({
   reducers: {
     addIngredient(state, action: PayloadAction<TIngredient>) {
       if (action.payload.type === 'bun') {
-        state.constructorItems.bun = action.payload;
+        state.constructorBurger.bun = action.payload;
       } else {
-        state.constructorItems.ingredients.push({
+        state.constructorBurger.ingredients.push({
           ...action.payload,
           uniqueId: uuidv4()
         });
@@ -81,7 +81,7 @@ const stellarBurgerSlice = createSlice({
     closeOrderRequest(state) {
       state.orderRequest = false;
       state.orderModalData = null;
-      state.constructorItems = {
+      state.constructorBurger = {
         bun: {
           price: 0
         },
@@ -101,11 +101,11 @@ const stellarBurgerSlice = createSlice({
       state.isModalOpened = false;
     },
     deleteIngredient(state, action: PayloadAction<TIngredientUnique>) {
-      const ingredientIndex = state.constructorItems.ingredients.findIndex(
+      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
         (item) => item.uniqueId === action.payload.uniqueId
       );
-      state.constructorItems.ingredients =
-        state.constructorItems.ingredients.filter(
+      state.constructorBurger.ingredients =
+        state.constructorBurger.ingredients.filter(
           (_, index) => index !== ingredientIndex
         );
     },
@@ -116,11 +116,11 @@ const stellarBurgerSlice = createSlice({
       state.errorText = '';
     },
     moveIngredientUp(state, action: PayloadAction<TIngredientUnique>) {
-      const ingredientIndex = state.constructorItems.ingredients.findIndex(
+      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
         (item) => item.uniqueId === action.payload.uniqueId
       );
-      const prevItem = state.constructorItems.ingredients[ingredientIndex - 1];
-      state.constructorItems.ingredients.splice(
+      const prevItem = state.constructorBurger.ingredients[ingredientIndex - 1];
+      state.constructorBurger.ingredients.splice(
         ingredientIndex - 1,
         2,
         action.payload,
@@ -128,11 +128,11 @@ const stellarBurgerSlice = createSlice({
       );
     },
     moveIngredientDown(state, action: PayloadAction<TIngredientUnique>) {
-      const ingredientIndex = state.constructorItems.ingredients.findIndex(
+      const ingredientIndex = state.constructorBurger.ingredients.findIndex(
         (item) => item.uniqueId === action.payload.uniqueId
       );
-      const nextItem = state.constructorItems.ingredients[ingredientIndex + 1];
-      state.constructorItems.ingredients.splice(
+      const nextItem = state.constructorBurger.ingredients[ingredientIndex + 1];
+      state.constructorBurger.ingredients.splice(
         ingredientIndex,
         2,
         nextItem,
@@ -147,7 +147,7 @@ const stellarBurgerSlice = createSlice({
     selectIngredients: (state) => state.ingredients,
     selectLoading: (state) => state.loading,
     selectOrderModalData: (state) => state.orderModalData,
-    selectConstructorItems: (state) => state.constructorItems,
+    selectConstructorBurger: (state) => state.constructorBurger,
     selectOrderRequest: (state) => state.orderRequest,
     selectUser: (state) => state.user,
     selectOrders: (state) => state.orders,
@@ -318,7 +318,7 @@ export const {
   selectLoading,
   selectIngredients,
   selectOrderModalData,
-  selectConstructorItems,
+  selectConstructorBurger,
   selectOrderRequest,
   selectUser,
   selectOrders,
