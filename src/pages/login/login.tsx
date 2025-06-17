@@ -8,7 +8,7 @@ import {
 } from '../../slices/burgerSlice';
 import { useAppDispatch, useAppSelector } from '../../services/store';
 import { useForm } from '../../hooks/useForm';
-
+import { setCookie } from '../../utils/cookie';
 import { Preloader } from '@ui';
 
 export const Login: FC = () => {
@@ -26,7 +26,12 @@ export const Login: FC = () => {
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     dispatch(removeErrorText());
-    dispatch(fetchLoginUser(values));
+    dispatch(fetchLoginUser(values))
+      .unwrap()
+      .then((payload) => {
+        setCookie('accessToken', payload.accessToken);
+        localStorage.setItem('refreshToken', payload.refreshToken);
+      });
   };
 
   if (isLoading) {

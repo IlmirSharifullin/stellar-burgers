@@ -25,7 +25,7 @@ import {
   useAppDispatch,
   useAppSelector
 } from '../../services/store';
-import { getCookie } from '../../utils/cookie';
+import { deleteCookie, getCookie } from '../../utils/cookie';
 import {
   closeModal,
   fetchFeed,
@@ -49,7 +49,15 @@ export const App = () => {
   const feed = useAppSelector(selectOrders);
   useEffect(() => {
     if (!isAuthenticated && token) {
-      dispatch(getUserThunk()).then(() => dispatch(init()));
+      dispatch(getUserThunk())
+        .unwrap()
+        .then(() => {
+          dispatch(init());
+        })
+        .catch((e) => {
+          deleteCookie('accessToken');
+          localStorage.removeItem('refreshToken');
+        });
     } else {
       dispatch(init());
     }
